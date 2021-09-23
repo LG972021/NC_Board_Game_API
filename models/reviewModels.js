@@ -122,3 +122,23 @@ exports.changeReviewById = async (incAmount, review_id) => {
     return response.rows[0];
   }
 };
+
+exports.fetchCommentsForReviewById = async (review_id) => {
+  const response = await db.query(
+    `SELECT * FROM reviews 
+    JOIN comments ON reviews.review_id = comments.review_id
+    WHERE review.review_id = 1 
+    ;`,
+    [review_id]
+  );
+  console.log(response.rows[0]);
+
+  if (response.rows.length === 0) {
+    return Promise.reject({
+      status: 404,
+      msg: `No review with that ID currently`,
+    });
+  } else {
+    return response.rows[0];
+  }
+};

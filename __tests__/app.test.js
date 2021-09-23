@@ -356,4 +356,25 @@ describe("GET /api/reviews", () => {
       descending: false,
     });
   });
+
+  test("200 : array of reviews sorted by review_id in ASC (ascending) when queried with sort_by = review_id, order=ASC", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=review_id&order=ASC")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("review_id", {
+      descending: false,
+    });
+  });
+});
+
+describe.only("GET /api/reviews/:review_id/comments", () => {
+  test("200 : Responds wtih object with key review_comments : value Array of Reviews ", async () => {
+    const response = await request(app)
+      .get("/api/reviews/1/comments")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review_comments).toBe("Hello there");
+  });
 });

@@ -2,6 +2,7 @@ const {
   fetchReviewById,
   changeReviewById,
   fetchAllReviews,
+  fetchCommentsForReviewById,
 } = require("../models/reviewModels");
 
 exports.getReviews = async (req, res, next) => {
@@ -37,6 +38,18 @@ exports.patchReviewById = async (req, res, next) => {
     const patchedReview = await changeReviewById(incAmount, review_id);
 
     res.status(200).send({ updatedReview: patchedReview });
+  } catch (error) {
+    next(error);
+  }
+};
+
+exports.getCommentsForReviewById = async (req, res, next) => {
+  try {
+    const review_id = req.params.review_id;
+
+    const commentsForReview = await fetchCommentsForReviewById(review_id);
+
+    res.status(200).send({ review_comments: commentsForReview });
   } catch (error) {
     next(error);
   }
