@@ -6,7 +6,9 @@
   "scripts": {
     "setup-dbs": "psql -f ./db/setup.sql",
     "seed": "node ./db/seeds/run-seed.js",
-    "test": "NODE_ENV=test jest"
+    "test": "NODE_ENV=test jest",
+    "seed:prod": "NODE_ENV=production DATABASE_URL=$(heroku config:get DATABASE_URL) npm run seed",
+    "start": "node listen.js"
   },
   "repository": {
     "type": "git",
@@ -21,9 +23,19 @@
   "homepage": "https://github.com/northcoders/be-nc-games#readme",
   "dependencies": {
     "dotenv": "^10.0.0",
+    "express": "^4.17.1",
     "jest": "^27.2.1",
     "pg": "^8.7.1",
     "pg-format": "^1.0.4",
+    "supertest": "^6.1.6",
     "test": "^0.6.0"
+  },
+  "devDependencies": {
+    "jest-sorted": "^1.0.12"
+  },
+  "jest": {
+    "setupFilesAfterEnv": [
+      "jest-sorted"
+    ]
   }
 }

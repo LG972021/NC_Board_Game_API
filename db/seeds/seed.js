@@ -1,6 +1,11 @@
-const db = require('../connection');
-const format = require('pg-format');
-const { formatCategoryData, formatUserData, formatReviewData, formatCommentData } = require('../utils/data-manipulation');
+const db = require("../connection");
+const format = require("pg-format");
+const {
+  formatCategoryData,
+  formatUserData,
+  formatReviewData,
+  formatCommentData,
+} = require("../utils/data-manipulation");
 
 const seed = (data) => {
   const { categoryData, commentData, reviewData, userData } = data;
@@ -8,38 +13,37 @@ const seed = (data) => {
   // 2. insert data
 
   //Drops Tables if they already exist
-  return db.query('DROP TABLE IF EXISTS comments') 
-  .then(() => {
-    return db.query('DROP TABLE IF EXISTS reviews') 
-  })
-  .then(() => {
-    return db.query('DROP TABLE IF EXISTS users')
-  })
-  .then(() => {
-    return db.query('DROP TABLE IF EXISTS categories')
-  })
+  return (
+    db
+      .query("DROP TABLE IF EXISTS comments")
+      .then(() => {
+        return db.query("DROP TABLE IF EXISTS reviews");
+      })
+      .then(() => {
+        return db.query("DROP TABLE IF EXISTS users");
+      })
+      .then(() => {
+        return db.query("DROP TABLE IF EXISTS categories");
+      })
 
-  .then(() => {
-    console.log("Tables Dropped");
-  })
+      // .then(() => {
+      //   console.log("Tables Dropped");
+      // })
 
-
-
-
-  //Creates New Tables and gives them collum names 
-  .then(() => {
-    return db.query(`
+      //Creates New Tables and gives them collum names
+      .then(() => {
+        return db.query(`
     CREATE TABLE categories ( 
       slug VARCHAR (255) PRIMARY KEY,
-      description TEXT NOT NULL);`
-    )})
-    .then(() => {
-      return db.query(`
+      description TEXT NOT NULL);`);
+      })
+      .then(() => {
+        return db.query(`
       CREATE TABLE users ( 
         username VARCHAR (255) PRIMARY KEY, 
         avatar_url TEXT, 
-        name VARCHAR (255) );`
-      )})
+        name VARCHAR (255) );`);
+      })
 
       .then(() => {
         return db.query(`
@@ -58,12 +62,11 @@ const seed = (data) => {
           FOREIGN KEY (owner) REFERENCES users(username),
 
           created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
-          );`
-        )})
+          );`);
+      })
 
-
-        .then(() => {
-          return db.query(`
+      .then(() => {
+        return db.query(`
           CREATE TABLE comments ( 
             comment_id SERIAL PRIMARY KEY, 
             author VARCHAR (255),
@@ -73,42 +76,47 @@ const seed = (data) => {
 
             votes INT DEFAULT 0,
             created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            body TEXT );`
-          )})
+            body TEXT );`);
+      })
 
-          .then(() => {
-            console.log("Tables Created");
-          })
-        
+      // .then(() => {
+      //   // console.log("Tables Created");
+      // })
 
-
-  //Populate tables with data from db folders.
-    .then(() => {
-      const sql = format(`
+      //Populate tables with data from db folders.
+      .then(() => {
+        const sql = format(
+          `
       INSERT INTO categories 
       (slug, description)
       VALUES 
       %L
       RETURNING * 
-      `, formatCategoryData(categoryData));
-      
-      return db.query (sql)
-})
+      `,
+          formatCategoryData(categoryData)
+        );
 
-.then(() => {
-  const sql = format(`
+        return db.query(sql);
+      })
+
+      .then(() => {
+        const sql = format(
+          `
   INSERT INTO users 
   (username, avatar_url, name)
   VALUES 
   %L
   RETURNING * 
-  `, formatUserData(userData));
-  
-  return db.query (sql)
-})
+  `,
+          formatUserData(userData)
+        );
 
-.then(() => {
-  const sql = format(`
+        return db.query(sql);
+      })
+
+      .then(() => {
+        const sql = format(
+          `
   INSERT INTO reviews 
   (title, review_body, designer, review_img_url,
   votes, category_slug, owner, created_at)
@@ -116,25 +124,29 @@ const seed = (data) => {
   %L
   RETURNING *
 
-  `, formatReviewData(reviewData));
-  
-  return db.query (sql)
-})
+  `,
+          formatReviewData(reviewData)
+        );
 
-.then(() => {
-  const sql = format(`
+        return db.query(sql);
+      })
+
+      .then(() => {
+        const sql = format(
+          `
   INSERT INTO comments
   (author, review_id, votes, created_at, body)
   VALUES 
   %L
   RETURNING *
 
-  `, formatCommentData(commentData));
-  
-  return db.query (sql)
-})
-
+  `,
+          formatCommentData(commentData)
+        );
+        // console.log("Seeding Ready");
+        return db.query(sql);
+      })
+  );
 };
 
 module.exports = seed;
-
