@@ -55,8 +55,8 @@ const seed = (data) => {
           review_img_url VARCHAR (255) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
           votes INT DEFAULT 0,
 
-          category_slug VARCHAR (255),
-          FOREIGN KEY (category_slug) REFERENCES categories(slug),
+          category VARCHAR (255),
+          FOREIGN KEY (category) REFERENCES categories(slug),
 
           owner VARCHAR (255),
           FOREIGN KEY (owner) REFERENCES users(username),
@@ -119,7 +119,7 @@ const seed = (data) => {
           `
   INSERT INTO reviews 
   (title, review_body, designer, review_img_url,
-  votes, category_slug, owner, created_at)
+  votes, category, owner, created_at)
   VALUES 
   %L
   RETURNING *

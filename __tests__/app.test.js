@@ -3,7 +3,6 @@ const app = require("../app.js");
 const db = require("../db/connection.js");
 const testData = require("../db/data/test-data/index.js");
 const seed = require("../db/seeds/seed.js");
-const jestSorted = require("jest-sorted");
 
 beforeEach(() => seed(testData));
 afterAll(() => db.end());
@@ -106,8 +105,8 @@ describe("GET /api/reviews/:review_id", () => {
     expect(response.body.review.hasOwnProperty("review_img_url")).toBe(true);
     expect(typeof response.body.review.review_img_url).toBe("string");
 
-    expect(response.body.review.hasOwnProperty("category_slug")).toBe(true);
-    expect(typeof response.body.review.category_slug).toBe("string");
+    expect(response.body.review.hasOwnProperty("category")).toBe(true);
+    expect(typeof response.body.review.category).toBe("string");
 
     expect(response.body.review.hasOwnProperty("created_at")).toBe(true);
 
@@ -187,13 +186,11 @@ describe("PATCH /api/reviews/:review_id", () => {
     );
     expect(typeof response.body.updatedReview.review_img_url).toBe("string");
 
-    expect(response.body.updatedReview.hasOwnProperty("category_slug")).toBe(
-      true
-    );
-    expect(typeof response.body.updatedReview.category_slug).toBe("string");
+    expect(response.body.updatedReview.hasOwnProperty("category")).toBe(true);
+    expect(typeof response.body.updatedReview.category).toBe("string");
 
     expect(response.body.updatedReview.hasOwnProperty("created_at")).toBe(true);
-    expect(typeof response.body.updatedReview.category_slug).toBe("string");
+    expect(typeof response.body.updatedReview.category).toBe("string");
 
     expect(response.body.updatedReview.hasOwnProperty("votes")).toBe(true);
     expect(typeof response.body.updatedReview.votes).toBe("number");
@@ -214,7 +211,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       review_img_url:
         "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
       review_body: "Fiddly fun for all the family",
-      category_slug: "dexterity",
+      category: "dexterity",
       created_at: expect.any(String),
       votes: 6,
     });
@@ -258,27 +255,105 @@ describe("PATCH /api/reviews/:review_id", () => {
   });
 });
 
-describe.only("GET /api/reviews", () => {
+describe("GET /api/reviews", () => {
   test("200 : Responds wtih object with key reviews : value array of reviews", async () => {
     const response = await request(app)
       .get("/api/reviews")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
     expect(response.body.reviews.length).toBe(13);
-    expect(response.body.reviews.toBeSortedBy("created_at")).toBe(true);
   });
-  //   // test("200 : Responds wtih object with key reviews : value array of reviews in correct sort when queried with sort_by", async () => {
-  //   //   const response = await request(app)
-  //   //     .get("/api/reviews?sort_by=votes")
-  //   //     .expect(200)
-  //   //     .expect("Content-Type", "application/json; charset=utf-8");
-  //   //   expect(response.body.reviews).toBe(13);
-  //   // });
-  //   // test("200 : Responds wtih object with key reviews : value array of reviews in correct sort when queried with sort_by", async () => {
-  //   //   const response = await request(app)
-  //   //     .get("/api/reviews?category=strategy")
-  //   //     .expect(200)
-  //   //     .expect("Content-Type", "application/json; charset=utf-8");
-  //   //   expect(response.body.reviews).toBe(13);
-  //   // });
+  test("200: Array of reviews sorted by date when no queries are present for sort_by", async () => {
+    const response = await request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+  });
+  test("200: Array of reviews sorted IN DESCENDING ORDER when no queries are present for order", async () => {
+    const response = await request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+  });
+  test("200: Array of reviews UNFILTERED when no query for category is present", async () => {
+    const response = await request(app)
+      .get("/api/reviews")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+  });
+  test("200: Array of reviews sorted by votes when vote is present for sort_by query", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=votes")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("votes", {
+      descending: true,
+    });
+  });
+
+  test("200: Array of reviews sorted in date ASCENDING order when no sort_by query present, but order query (ASC) is present", async () => {
+    const response = await request(app)
+      .get("/api/reviews?order=ASC")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: false,
+    });
+  });
+
+  test("200: Array of reviews sorted by votes IN ASCENDING ORDER when queries present for sort_by (votes) and order (ASC)", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=votes&order=ASC")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(13);
+    expect(response.body.reviews).toBeSortedBy("votes", {
+      descending: false,
+    });
+  });
+
+  test("200: Array of reviews FILTERED to only to entries with matching category where category query is present", async () => {
+    let response = await request(app)
+      .get("/api/reviews?category=social deduction")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(11);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+
+    response = await request(app)
+      .get("/api/reviews?category=euro game")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(1);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+  });
+
+  test("200 : array of reviews sorted by title (alphabetical) in ASC (ascending) category (social deduction) when queried with sort_by = title, order=ASC, ", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=title&category=social deduction&order=ASC")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.reviews.length).toBe(11);
+    expect(response.body.reviews).toBeSortedBy("title", {
+      descending: false,
+    });
+  });
 });

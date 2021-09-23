@@ -24,6 +24,9 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
     "roll-and-write",
     "deck-building",
     "engine-building",
+    "euro game",
+    "dexterity",
+    "social deduction",
   ];
 
   if (category !== undefined) {
@@ -33,8 +36,8 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
         msg: `Cannot sort by that category`,
       });
     } else {
-      SQLQuery += `WHERE category_slug = ${category} `;
-      console.log(SQLQuery);
+      SQLQuery += `WHERE category = '${category}' `;
+      // console.log(SQLQuery);
     }
   }
 
@@ -46,17 +49,17 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
       });
     } else {
       SQLQuery += `ORDER BY ${sort_by}`;
-      console.log(SQLQuery);
+      // console.log(SQLQuery);
     }
   }
 
   if (sort_by === undefined) {
     SQLQuery += `ORDER BY created_at`;
-    console.log(SQLQuery);
+    // console.log(SQLQuery);
   }
 
   if (order !== undefined) {
-    if (order === " ASC") {
+    if (order === "ASC") {
       SQLQuery += ` ASC`;
     } else {
       SQLQuery += ` DESC`;
@@ -65,12 +68,12 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
 
   if (order === undefined) {
     SQLQuery += ` DESC`;
-    console.log(SQLQuery);
+    // console.log(SQLQuery);
   }
 
   SQLQuery += ";";
-  console.log(SQLQuery);
-
+  // console.log(SQLQuery);
+  // console.log(SQLQuery);
   const response = await db.query(SQLQuery);
   // console.log(response.rows);
   return response.rows;
