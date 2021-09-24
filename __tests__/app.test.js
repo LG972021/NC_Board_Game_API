@@ -369,12 +369,30 @@ describe("GET /api/reviews", () => {
   });
 });
 
-describe.only("GET /api/reviews/:review_id/comments", () => {
+describe("GET /api/reviews/:review_id/comments", () => {
   test("200 : Responds wtih object with key review_comments : value Array of Reviews ", async () => {
-    const response = await request(app)
-      .get("/api/reviews/1/comments")
+    let response = await request(app)
+      .get("/api/reviews/2/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.review_comments).toBe("Hello there");
+    expect(response.body.review_comments.length).toBe(3);
+
+    response = await request(app)
+      .get("/api/reviews/2")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review.comment_count).toBe(3);
+
+    response = await request(app)
+      .get("/api/reviews/3/comments")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review_comments.length).toBe(3);
+
+    response = await request(app)
+      .get("/api/reviews/3")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review.comment_count).toBe(3);
   });
 });
