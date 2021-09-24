@@ -322,7 +322,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(typeof response.body.posted_comment).toEqual("object");
+    expect(typeof response.body.posted_comment).toBe("object");
   });
 
   test("200 : Comment object should contain correct properties of the correct datatypes", async () => {
@@ -336,29 +336,27 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.posted_comment.hasOwnProperty("comment_id")).toEqual(
+    expect(response.body.posted_comment.hasOwnProperty("comment_id")).toBe(
       true
     );
-    expect(typeof response.body.posted_comment.comment_id).toEqual("number");
+    expect(typeof response.body.posted_comment.comment_id).toBe("number");
 
-    expect(response.body.posted_comment.hasOwnProperty("body")).toEqual(true);
-    expect(typeof response.body.posted_comment.body).toEqual("string");
+    expect(response.body.posted_comment.hasOwnProperty("body")).toBe(true);
+    expect(typeof response.body.posted_comment.body).toBe("string");
 
-    expect(response.body.posted_comment.hasOwnProperty("votes")).toEqual(true);
-    expect(typeof response.body.posted_comment.votes).toEqual("number");
+    expect(response.body.posted_comment.hasOwnProperty("votes")).toBe(true);
+    expect(typeof response.body.posted_comment.votes).toBe("number");
 
-    expect(response.body.posted_comment.hasOwnProperty("author")).toEqual(true);
-    expect(typeof response.body.posted_comment.author).toEqual("string");
+    expect(response.body.posted_comment.hasOwnProperty("author")).toBe(true);
+    expect(typeof response.body.posted_comment.author).toBe("string");
 
-    expect(response.body.posted_comment.hasOwnProperty("review_id")).toEqual(
+    expect(response.body.posted_comment.hasOwnProperty("review_id")).toBe(true);
+    expect(typeof response.body.posted_comment.review_id).toBe("number");
+
+    expect(response.body.posted_comment.hasOwnProperty("created_at")).toBe(
       true
     );
-    expect(typeof response.body.posted_comment.review_id).toEqual("number");
-
-    expect(response.body.posted_comment.hasOwnProperty("created_at")).toEqual(
-      true
-    );
-    expect(typeof response.body.posted_comment.author).toEqual("string");
+    expect(typeof response.body.posted_comment.author).toBe("string");
   });
 
   test("200 : Comment object's author and body properties should reflect the values in input object whilst incremented comment_id for new comments", async () => {
@@ -407,7 +405,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(404)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.msg).toEqual("Invalid Review_ID or Username");
+    expect(response.body.msg).toBe("Invalid Review_ID or Username");
   });
 
   test("404 : Responds wtih 404 and error message when username isn't on list of users", async () => {
@@ -421,7 +419,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(404)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.msg).toEqual("Invalid Review_ID or Username");
+    expect(response.body.msg).toBe("Invalid Review_ID or Username");
   });
 });
 
@@ -431,7 +429,7 @@ describe("Get /api", () => {
       .get("/api")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(typeof response.body).toEqual("object");
+    expect(typeof response.body).toBe("object");
   });
 
   test("200 : Responds wtih object with keys categories of paths : values list of available paths", async () => {
@@ -440,7 +438,7 @@ describe("Get /api", () => {
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
     expect(response.body.Misc_Endpoints).toEqual(["/", "/hello"]);
-    expect(response.body.Category_Endpoints).toEqual("/");
+    expect(response.body.Category_Endpoints).toBe("/");
     expect(response.body.Review_Endpoints).toEqual([
       "/",
       "/:review_id",
