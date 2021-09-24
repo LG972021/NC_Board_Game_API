@@ -54,3 +54,15 @@ exports.getCommentsForReviewById = async (req, res, next) => {
     next(error);
   }
 };
+
+// exports.postCommentForReviewById = async (req, res, next) => {
+//   try {
+//     const review_id = req.params.review_id;
+
+//     const commentsForReview = await;
+
+//     res.status(200).send({ posted_comment: commentsForReview });
+//   } catch (error) {
+//     next(error);
+//   }
+// };

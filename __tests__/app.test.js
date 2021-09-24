@@ -395,4 +395,12 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .expect("Content-Type", "application/json; charset=utf-8");
     expect(response.body.review.comment_count).toBe(3);
   });
+
+  test("200 : Elements in Array of Reviews should have correct properties and types", async () => {
+    let response = await request(app)
+      .get("/api/reviews/2/comments")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review_comments.hasOwnProperty("body")).toBe(true);
+  });
 });
