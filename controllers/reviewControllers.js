@@ -3,6 +3,7 @@ const {
   changeReviewById,
   fetchAllReviews,
   fetchCommentsForReviewById,
+  addCommentForReviewById,
 } = require("../models/reviewModels");
 
 exports.getReviews = async (req, res, next) => {
@@ -55,14 +56,19 @@ exports.getCommentsForReviewById = async (req, res, next) => {
   }
 };
 
-// exports.postCommentForReviewById = async (req, res, next) => {
-//   try {
-//     const review_id = req.params.review_id;
+exports.postCommentForReviewById = async (req, res, next) => {
+  try {
+    const review_id = req.params.review_id;
+    const author = req.body.username;
+    const body = req.body.body;
 
-//     const commentsForReview = await;
-
-//     res.status(200).send({ posted_comment: commentsForReview });
-//   } catch (error) {
-//     next(error);
-//   }
-// };
+    const commentForReview = await addCommentForReviewById(
+      review_id,
+      author,
+      body
+    );
+    res.status(201).send({ posted_comment: commentForReview });
+  } catch (error) {
+    next(error);
+  }
+};

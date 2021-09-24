@@ -1,4 +1,5 @@
 const { response } = require("express");
+const format = require("pg-format");
 const db = require("../db/connection.js");
 const { sort } = require("../db/data/test-data/categories.js");
 
@@ -137,5 +138,37 @@ exports.fetchCommentsForReviewById = async (review_id) => {
     });
   } else {
     return response.rows;
+  }
+};
+
+exports.addCommentForReviewById = async (review_id, author, body) => {
+  const reviewExistsCheck = await db.query(
+    "SELECT * FROM reviews WHERE review_id = $1;",
+    [review_id]
+  );
+  const authorExistsCheck = await db.query(
+    "SELECT * FROM users WHERE username = $1;",
+    [author]
+  );
+
+  if (
+    reviewExistsCheck.rows.length === 0 ||
+    authorExistsCheck.rows.length === 0
+  ) {
+    return Promise.reject({
+      status: 404,
+      msg: `Invalid Review_ID or Username`,
+    });
+  } else {
+    const response = await db.query(
+      `INSERT INTO comments
+        (author, review_id, votes, created_at, body)
+        VALUES 
+        ($1, $2, 0, CURRENT_TIMESTAMP ,$3)
+        RETURNING *;`,
+      [author, review_id, body]
+    );
+
+    return response.rows[0];
   }
 };
