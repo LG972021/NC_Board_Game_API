@@ -12,7 +12,7 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
     "designer",
     "review_img_url",
     "votes",
-    "category_slug",
+    "category",
     "owner",
     "created_at",
   ];

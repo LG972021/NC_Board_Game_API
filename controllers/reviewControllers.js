@@ -8,7 +8,9 @@ const {
 
 exports.getReviews = async (req, res, next) => {
   try {
-    const { sort_by, order, cat } = req.query;
+    const sort_by = req.query.sort_by;
+    const order = req.query.order;
+    const cat = req.query.cat;
 
     const fetchedReviews = await fetchAllReviews(sort_by, order, cat);
 
