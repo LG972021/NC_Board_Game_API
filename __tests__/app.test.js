@@ -103,6 +103,36 @@ describe("GET /api/reviews", () => {
     });
   });
 
+  test("200 : By Default, returned object is organsied by created_by in DESC order.", async () => {
+    let response = await request(app).get("/api/reviews").expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 7,
+      title: "Mollit elit qui incididunt veniam occaecat cupidatat",
+      review_body:
+        "Consectetur incididunt aliquip sunt officia. Magna ex nulla consectetur laboris incididunt ea non qui. Enim id eiusmod irure dolor ipsum in tempor consequat amet ullamco. Occaecat fugiat sint fugiat mollit consequat pariatur consequat non exercitation dolore. Labore occaecat in magna commodo anim enim eiusmod eu pariatur ad duis magna. Voluptate ad et dolore ullamco anim sunt do. Qui exercitation tempor in in minim ullamco fugiat ipsum. Duis irure voluptate cupidatat do id mollit veniam culpa. Velit deserunt exercitation amet laborum nostrud dolore in occaecat minim amet nostrud sunt in. Veniam ut aliqua incididunt commodo sint in anim duis id commodo voluptate sit quis.",
+      designer: "Avery Wunzboogerz",
+      review_img_url:
+        "https://images.pexels.com/photos/278888/pexels-photo-278888.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+      votes: 9,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "2021-01-25T11:16:54.963Z",
+    });
+    expect(response.body.reviews[1]).toEqual({
+      review_id: 4,
+      title: "Dolor reprehenderit",
+      review_body:
+        "Consequat velit occaecat voluptate do. Dolor pariatur fugiat sint et proident ex do consequat est. Nisi minim laboris mollit cupidatat et adipisicing laborum do. Sint sit tempor officia pariatur duis ullamco labore ipsum nisi voluptate nulla eu veniam. Et do ad id dolore id cillum non non culpa. Cillum mollit dolor dolore excepteur aliquip. Cillum aliquip quis aute enim anim ex laborum officia. Aliqua magna elit reprehenderit Lorem elit non laboris irure qui aliquip ad proident. Qui enim mollit Lorem labore eiusmod",
+      designer: "Gamey McGameface",
+      review_img_url:
+        "https://images.pexels.com/photos/278918/pexels-photo-278918.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+      votes: 7,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "2021-01-22T11:35:50.936Z",
+    });
+  });
+
   test("200 : Functionality in place to order reviews in returned object by one of its properties (ASC or DESC) .", async () => {
     let response = await request(app)
       .get("/api/reviews?sort_by=votes")
@@ -175,6 +205,31 @@ describe("GET /api/reviews", () => {
       owner: "philippaclaire9",
       created_at: "2021-01-18T10:01:41.251Z",
     });
+    expect(response.body.reviews.length).toEqual(1);
+
+    response = await request(app)
+      .get("/api/reviews?cat=social deduction")
+      .expect(200);
+
+    expect(response.body.reviews.length).toEqual(11);
+  });
+
+  test.only("200 : Functionality in place to Both Sort response by one of it's property's and filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
+    let response = await request(app)
+      .get("/api/reviews?sort_by=title&&order=ASC&&cat=dexterity")
+      .expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 2,
+      title: "Jenga",
+      review_body: "Fiddly fun for all the family",
+      designer: "Leslie Scott",
+      review_img_url:
+        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+      votes: 5,
+      category: "dexterity",
+      owner: "philippaclaire9",
+      created_at: "2021-01-18T10:01:41.251Z",
+    });
   });
 });
 
@@ -217,7 +272,7 @@ describe("GET /api/reviews/:review_id", () => {
     expect(response.body.review.comment_count).toBe(3);
   });
 
-  test("404 : Returns Error Message when path references Invalid Id", async () => {
+  test("404 : Returns Error Message when path uses Id with no associated review", async () => {
     const response = await request(app).get("/api/reviews/2000").expect(404);
     expect(response.body).toEqual({
       msg: `No review with that ID currently`,
@@ -310,7 +365,7 @@ describe("PATCH /api/reviews/:review_id", () => {
     expect(response.body.updatedReview.votes).toBe(-95);
   });
 
-  test("404 : Returns Error Message when path references Invalid Id", async () => {
+  test("404 : Returns Error Message when path uses Id with no associated review", async () => {
     const response = await request(app)
       .patch("/api/reviews/2000")
       .send(inpuctObjInc3)
