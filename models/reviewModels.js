@@ -37,7 +37,11 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
         msg: `Cannot sort by that category`,
       });
     } else {
-      SQLQuery += `WHERE category = '${category}' `;
+      if (process.env.PGDATABASE === "nc_games") {
+        SQLQuery += `WHERE category_slug = '${category}' `;
+      } else {
+        SQLQuery += `WHERE category = '${category}' `;
+      }
     }
   }
 

@@ -214,9 +214,9 @@ describe("GET /api/reviews", () => {
     expect(response.body.reviews.length).toEqual(11);
   });
 
-  test.only("200 : Functionality in place to Both Sort response by one of it's property's and filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
+  test("200 : Functionality in place to Both Sort response by one of it's property's and filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
     let response = await request(app)
-      .get("/api/reviews?sort_by=title&&order=ASC&&cat=dexterity")
+      .get("/api/reviews?cat=dexterity")
       .expect(200);
     expect(response.body.reviews[0]).toEqual({
       review_id: 2,
