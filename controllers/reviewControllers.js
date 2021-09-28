@@ -8,9 +8,9 @@ const {
 
 exports.getReviews = async (req, res, next) => {
   try {
-    const { sort_by, order, category } = req.query;
+    const { sort_by, order, cat } = req.query;
 
-    const fetchedReviews = await fetchAllReviews(sort_by, order, category);
+    const fetchedReviews = await fetchAllReviews(sort_by, order, cat);
 
     res.status(200).send({ reviews: fetchedReviews });
   } catch (error) {

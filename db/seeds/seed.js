@@ -26,62 +26,54 @@ const seed = (data) => {
         return db.query("DROP TABLE IF EXISTS categories");
       })
 
-      // .then(() => {
-      //   console.log("Tables Dropped");
-      // })
-
       //Creates New Tables and gives them collum names
       .then(() => {
         return db.query(`
     CREATE TABLE categories ( 
-      slug VARCHAR (255) PRIMARY KEY,
+      slug VARCHAR (255) PRIMARY KEY NOT NULL,
       description TEXT NOT NULL);`);
       })
       .then(() => {
         return db.query(`
       CREATE TABLE users ( 
-        username VARCHAR (255) PRIMARY KEY, 
-        avatar_url TEXT, 
-        name VARCHAR (255) );`);
+        username VARCHAR (255) PRIMARY KEY NOT NULL, 
+        avatar_url TEXT NOT NULL, 
+        name VARCHAR (255) NOT NULL);`);
       })
 
       .then(() => {
         return db.query(`
         CREATE TABLE reviews ( 
-          review_id SERIAL PRIMARY KEY, 
-          title VARCHAR (500), 
-          review_body TEXT, 
-          designer VARCHAR (255), 
+          review_id SERIAL PRIMARY KEY NOT NULL, 
+          title VARCHAR (500) NOT NULL, 
+          review_body TEXT NOT NULL, 
+          designer VARCHAR (255) NOT NULL, 
           review_img_url VARCHAR (255) DEFAULT 'https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg',
-          votes INT DEFAULT 0,
+          votes INT DEFAULT 0 NOT NULL,
 
-          category VARCHAR (255),
+          category VARCHAR (255) NOT NULL,
           FOREIGN KEY (category) REFERENCES categories(slug),
 
-          owner VARCHAR (255),
+          owner VARCHAR (255) NOT NULL,
           FOREIGN KEY (owner) REFERENCES users(username),
 
-          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
+          created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL
           );`);
       })
 
       .then(() => {
         return db.query(`
           CREATE TABLE comments ( 
-            comment_id SERIAL PRIMARY KEY, 
-            author VARCHAR (255),
+            comment_id SERIAL PRIMARY KEY NOT NULL, 
+            author VARCHAR (255) NOT NULL,
             
-            review_id INT,
+            review_id INT NOT NULL,
             FOREIGN KEY (review_id) REFERENCES reviews (review_id),
 
-            votes INT DEFAULT 0,
-            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
-            body TEXT );`);
+            votes INT DEFAULT 0 NOT NULL,
+            created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP NOT NULL,
+            body TEXT NOT NULL );`);
       })
-
-      // .then(() => {
-      //   // console.log("Tables Created");
-      // })
 
       //Populate tables with data from db folders.
       .then(() => {
@@ -139,11 +131,9 @@ const seed = (data) => {
   VALUES 
   %L
   RETURNING *
-
   `,
           formatCommentData(commentData)
         );
-        // console.log("Seeding Ready");
         return db.query(sql);
       })
   );

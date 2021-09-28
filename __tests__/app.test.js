@@ -79,6 +79,105 @@ describe("GET /api/categories", () => {
   });
 });
 
+describe("GET /api/reviews", () => {
+  test("200 : Responds wtih object with key reviews : value review objects", async () => {
+    const response = await request(app).get("/api/reviews").expect(200);
+    expect(response.body.hasOwnProperty("reviews")).toBe(true);
+  });
+
+  test("200 : Responds wtih objects with corrrect properties of the correct data types.", async () => {
+    const response = await request(app).get("/api/reviews").expect(200);
+
+    response.body.reviews.forEach((review) => {
+      expect(review).toMatchObject({
+        owner: expect.any(String),
+        title: expect.any(String),
+        review_id: expect.any(Number),
+        review_body: expect.any(String),
+        designer: expect.any(String),
+        review_img_url: expect.any(String),
+        category: expect.any(String),
+        created_at: expect.any(String),
+        votes: expect.any(Number),
+      });
+    });
+  });
+
+  test("200 : Functionality in place to order reviews in returned object by one of its properties (ASC or DESC) .", async () => {
+    let response = await request(app)
+      .get("/api/reviews?sort_by=votes")
+      .expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 12,
+      title: "Scythe; you're gonna need a bigger table!",
+      review_body:
+        "Spend 30 minutes just setting up all of the boards (!) meeple and decks, just to forget how to play. Scythe can be a lengthy game but really packs a punch if you put the time in. With beautiful artwork, countless scenarios and clever game mechanics, this board game is a must for any board game fanatic; just make sure you explain ALL the rules before you start playing with first timers or you may find they bring it up again and again.",
+      designer: "Jamey Stegmaier",
+      review_img_url:
+        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+      votes: 100,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "2021-01-22T10:37:04.839Z",
+    });
+    expect(response.body.reviews[1]).toEqual({
+      review_id: 13,
+      title: "Settlers of Catan: Don't Settle For Less",
+      review_body:
+        "You have stumbled across an uncharted island rich in natural resources, but you are not alone; other adventurers have come ashore too, and the race to settle the island of Catan has begun! Whether you exert military force, build a road to rival the Great Wall, trade goods with ships from the outside world, or some combination of all three, the aim is the same: to dominate the island. Will you prevail? Proceed strategically, trade wisely, and may the odds be in favour.",
+      designer: "Klaus Teuber",
+      review_img_url:
+        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+      votes: 16,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "1970-01-10T03:08:38.400Z",
+    });
+
+    response = await request(app)
+      .get("/api/reviews?sort_by=votes&order=ASC")
+      .expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 1,
+      title: "Agricola",
+      review_body: "Farmyard fun!",
+      designer: "Uwe Rosenberg",
+      review_img_url:
+        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+      votes: 1,
+      category: "euro game",
+      owner: "mallionaire",
+      created_at: "2021-01-18T10:00:20.514Z",
+    });
+
+    response = await request(app).get("/api/reviews?sort_by=owner").expect(200);
+    expect(response.body.reviews[0].owner).toBe("philippaclaire9");
+
+    response = await request(app)
+      .get("/api/reviews?sort_by=owner&&order=ASC")
+      .expect(200);
+    expect(response.body.reviews[0].owner).toBe("bainesface");
+  });
+
+  test("200 : Functionality in place to filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
+    let response = await request(app)
+      .get("/api/reviews?cat=dexterity")
+      .expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 2,
+      title: "Jenga",
+      review_body: "Fiddly fun for all the family",
+      designer: "Leslie Scott",
+      review_img_url:
+        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+      votes: 5,
+      category: "dexterity",
+      owner: "philippaclaire9",
+      created_at: "2021-01-18T10:01:41.251Z",
+    });
+  });
+});
+
 describe("GET /api/reviews/:review_id", () => {
   test("200 : Responds wtih object with key review : value review object", async () => {
     const response = await request(app).get("/api/reviews/2").expect(200);
@@ -87,34 +186,19 @@ describe("GET /api/reviews/:review_id", () => {
 
   test("200 : Responds wtih object with corrrect properties of the correct data type.", async () => {
     const response = await request(app).get("/api/reviews/2").expect(200);
-    expect(response.body.review.hasOwnProperty("owner")).toBe(true);
-    expect(typeof response.body.review.owner).toBe("string");
 
-    expect(response.body.review.hasOwnProperty("title")).toBe(true);
-    expect(typeof response.body.review.title).toBe("string");
-
-    expect(response.body.review.hasOwnProperty("review_id")).toBe(true);
-    expect(typeof response.body.review.review_id).toBe("number");
-
-    expect(response.body.review.hasOwnProperty("review_body")).toBe(true);
-    expect(typeof response.body.review.review_body).toBe("string");
-
-    expect(response.body.review.hasOwnProperty("designer")).toBe(true);
-    expect(typeof response.body.review.designer).toBe("string");
-
-    expect(response.body.review.hasOwnProperty("review_img_url")).toBe(true);
-    expect(typeof response.body.review.review_img_url).toBe("string");
-
-    expect(response.body.review.hasOwnProperty("category")).toBe(true);
-    expect(typeof response.body.review.category).toBe("string");
-
-    expect(response.body.review.hasOwnProperty("created_at")).toBe(true);
-
-    expect(response.body.review.hasOwnProperty("votes")).toBe(true);
-    expect(typeof response.body.review.votes).toBe("number");
-
-    expect(response.body.review.hasOwnProperty("comment_count")).toBe(true);
-    expect(typeof response.body.review.comment_count).toBe("number");
+    expect(response.body.review).toMatchObject({
+      owner: expect.any(String),
+      title: expect.any(String),
+      review_id: expect.any(Number),
+      review_body: expect.any(String),
+      designer: expect.any(String),
+      review_img_url: expect.any(String),
+      category: expect.any(String),
+      created_at: expect.any(String),
+      votes: expect.any(Number),
+      comment_count: expect.any(Number),
+    });
   });
 
   test("200 : review object should have comment_count property, the value of which should be a number ", async () => {
@@ -135,7 +219,6 @@ describe("GET /api/reviews/:review_id", () => {
 
   test("404 : Returns Error Message when path references Invalid Id", async () => {
     const response = await request(app).get("/api/reviews/2000").expect(404);
-    console.log(response.body);
     expect(response.body).toEqual({
       msg: `No review with that ID currently`,
     });
@@ -164,36 +247,19 @@ describe("PATCH /api/reviews/:review_id", () => {
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
 
-    expect(response.body.updatedReview.hasOwnProperty("owner")).toBe(true);
-    expect(typeof response.body.updatedReview.owner).toBe("string");
+    expect(response.body.hasOwnProperty("updatedReview")).toBe(true);
 
-    expect(response.body.updatedReview.hasOwnProperty("title")).toBe(true);
-    expect(typeof response.body.updatedReview.title).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("review_id")).toBe(true);
-    expect(typeof response.body.updatedReview.review_id).toBe("number");
-
-    expect(response.body.updatedReview.hasOwnProperty("review_body")).toBe(
-      true
-    );
-    expect(typeof response.body.updatedReview.review_body).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("designer")).toBe(true);
-    expect(typeof response.body.updatedReview.designer).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("review_img_url")).toBe(
-      true
-    );
-    expect(typeof response.body.updatedReview.review_img_url).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("category")).toBe(true);
-    expect(typeof response.body.updatedReview.category).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("created_at")).toBe(true);
-    expect(typeof response.body.updatedReview.category).toBe("string");
-
-    expect(response.body.updatedReview.hasOwnProperty("votes")).toBe(true);
-    expect(typeof response.body.updatedReview.votes).toBe("number");
+    expect(response.body.updatedReview).toMatchObject({
+      owner: expect.any(String),
+      title: expect.any(String),
+      review_id: expect.any(Number),
+      review_body: expect.any(String),
+      designer: expect.any(String),
+      review_img_url: expect.any(String),
+      category: expect.any(String),
+      created_at: expect.any(String),
+      votes: expect.any(Number),
+    });
   });
 
   test("200 : Responds wtih object with key updatedReview : value patchedReview Object ", async () => {
@@ -287,26 +353,14 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .get("/api/reviews/2/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.review_comments[0].hasOwnProperty("body")).toBe(true);
-    expect(typeof response.body.review_comments[0].body).toBe("string");
-
-    expect(response.body.review_comments[0].hasOwnProperty("votes")).toBe(true);
-    expect(typeof response.body.review_comments[0].votes).toBe("number");
-
-    expect(response.body.review_comments[0].hasOwnProperty("author")).toBe(
-      true
-    );
-    expect(typeof response.body.review_comments[0].author).toBe("string");
-
-    expect(response.body.review_comments[0].hasOwnProperty("review_id")).toBe(
-      true
-    );
-    expect(typeof response.body.review_comments[0].review_id).toBe("number");
-
-    expect(response.body.review_comments[0].hasOwnProperty("created_at")).toBe(
-      true
-    );
-    expect(typeof response.body.review_comments[0].created_at).toBe("string");
+    response.body.review_comments.forEach((comment) => {
+      expect(comment).toMatchObject({
+        body: expect.any(String),
+        author: expect.any(String),
+        review_id: expect.any(Number),
+        created_at: expect.any(String),
+      });
+    });
   });
 });
 
@@ -336,27 +390,17 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.posted_comment.hasOwnProperty("comment_id")).toBe(
-      true
-    );
-    expect(typeof response.body.posted_comment.comment_id).toBe("number");
 
-    expect(response.body.posted_comment.hasOwnProperty("body")).toBe(true);
-    expect(typeof response.body.posted_comment.body).toBe("string");
+    expect(response.body.hasOwnProperty("posted_comment")).toBe(true);
 
-    expect(response.body.posted_comment.hasOwnProperty("votes")).toBe(true);
-    expect(typeof response.body.posted_comment.votes).toBe("number");
-
-    expect(response.body.posted_comment.hasOwnProperty("author")).toBe(true);
-    expect(typeof response.body.posted_comment.author).toBe("string");
-
-    expect(response.body.posted_comment.hasOwnProperty("review_id")).toBe(true);
-    expect(typeof response.body.posted_comment.review_id).toBe("number");
-
-    expect(response.body.posted_comment.hasOwnProperty("created_at")).toBe(
-      true
-    );
-    expect(typeof response.body.posted_comment.author).toBe("string");
+    expect(response.body.posted_comment).toMatchObject({
+      comment_id: expect.any(Number),
+      body: expect.any(String),
+      votes: expect.any(Number),
+      author: expect.any(String),
+      review_id: expect.any(Number),
+      created_at: expect.any(String),
+    });
   });
 
   test("200 : Comment object's author and body properties should reflect the values in input object whilst incremented comment_id for new comments", async () => {

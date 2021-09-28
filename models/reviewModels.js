@@ -38,7 +38,6 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
       });
     } else {
       SQLQuery += `WHERE category = '${category}' `;
-      // console.log(SQLQuery);
     }
   }
 
@@ -50,13 +49,11 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
       });
     } else {
       SQLQuery += `ORDER BY ${sort_by}`;
-      // console.log(SQLQuery);
     }
   }
 
   if (sort_by === undefined) {
     SQLQuery += `ORDER BY created_at`;
-    // console.log(SQLQuery);
   }
 
   if (order !== undefined) {
@@ -69,14 +66,10 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
 
   if (order === undefined) {
     SQLQuery += ` DESC`;
-    // console.log(SQLQuery);
   }
 
   SQLQuery += ";";
-  // console.log(SQLQuery);
-  // console.log(SQLQuery);
   const response = await db.query(SQLQuery);
-  // console.log(response.rows);
   return response.rows;
 };
 
