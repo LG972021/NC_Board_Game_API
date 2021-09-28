@@ -137,7 +137,6 @@ exports.fetchCommentsForReviewById = async (review_id) => {
     return response.rows;
   }
 };
-
 exports.addCommentForReviewById = async (review_id, author, body) => {
   const reviewExistsCheck = await db.query(
     "SELECT * FROM reviews WHERE review_id = $1;",

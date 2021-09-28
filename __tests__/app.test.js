@@ -193,6 +193,33 @@ describe("GET /api/reviews", () => {
     let response = await request(app)
       .get("/api/reviews?cat=dexterity")
       .expect(200);
+    expect(response.body.reviews).toEqual([
+      {
+        review_id: 2,
+        title: "Jenga",
+        review_body: "Fiddly fun for all the family",
+        designer: "Leslie Scott",
+        review_img_url:
+          "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
+        votes: 5,
+        category: "dexterity",
+        owner: "philippaclaire9",
+        created_at: "2021-01-18T10:01:41.251Z",
+      },
+    ]);
+    expect(response.body.reviews.length).toEqual(1);
+
+    response = await request(app)
+      .get("/api/reviews?cat=social deduction")
+      .expect(200);
+
+    expect(response.body.reviews.length).toEqual(11);
+  });
+
+  test("200 : Functionality in place to Both Sort response by one of it's property's and filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
+    let response = await request(app)
+      .get("/api/reviews?sort_by=title&&order=ASC&&cat=dexterity")
+      .expect(200);
     expect(response.body.reviews[0]).toEqual({
       review_id: 2,
       title: "Jenga",
@@ -206,30 +233,6 @@ describe("GET /api/reviews", () => {
       created_at: "2021-01-18T10:01:41.251Z",
     });
     expect(response.body.reviews.length).toEqual(1);
-
-    response = await request(app)
-      .get("/api/reviews?cat=social deduction")
-      .expect(200);
-
-    expect(response.body.reviews.length).toEqual(11);
-  });
-
-  test("200 : Functionality in place to Both Sort response by one of it's property's and filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
-    let response = await request(app)
-      .get("/api/reviews?cat=dexterity")
-      .expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 2,
-      title: "Jenga",
-      review_body: "Fiddly fun for all the family",
-      designer: "Leslie Scott",
-      review_img_url:
-        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-      votes: 5,
-      category: "dexterity",
-      owner: "philippaclaire9",
-      created_at: "2021-01-18T10:01:41.251Z",
-    });
   });
 });
 
