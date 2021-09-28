@@ -233,6 +233,24 @@ describe("GET /api/reviews", () => {
       created_at: "2021-01-18T10:01:41.251Z",
     });
     expect(response.body.reviews.length).toEqual(1);
+
+    response = await request(app)
+      .get("/api/reviews?sort_by=title&&order=ASC&&cat=social deduction")
+      .expect(200);
+    expect(response.body.reviews[0]).toEqual({
+      review_id: 9,
+      title: "A truly Quacking Game; Quacks of Quedlinburg",
+      review_body:
+        "Ever wish you could try your hand at mixing potions? Quacks of Quedlinburg will have you mixing up a homebrew like no other. Each player buys different ingredients (chips) that are drawn at random to reach the most points, but watch out, you'd better not let your cauldrom explode.",
+      designer: "Wolfgang Warsch",
+      review_img_url:
+        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
+      votes: 10,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "2021-01-18T10:01:41.251Z",
+    });
+    expect(response.body.reviews.length).toEqual(11);
   });
 });
 
