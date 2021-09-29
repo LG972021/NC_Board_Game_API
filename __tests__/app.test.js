@@ -58,7 +58,7 @@ describe("GET /api/categories", () => {
     expect(Array.isArray(response.body.categories)).toBe(true);
   });
 
-  test("200 : Array of category objects should be same length as numbe of entries in DB", async () => {
+  test("200 : Array of category objects should be same length as number of category entries in DB", async () => {
     const response = await request(app)
       .get("/api/categories")
       .expect(200)
