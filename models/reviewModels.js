@@ -33,8 +33,8 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
   if (category !== undefined) {
     if (!validCategories.includes(category)) {
       return Promise.reject({
-        status: 404,
-        msg: `Cannot sort by that category`,
+        status: 400,
+        msg: `Cannot filter by that category`,
       });
     } else {
       SQLQuery += `WHERE category = '${category}' `;
@@ -126,7 +126,7 @@ exports.fetchCommentsForReviewById = async (review_id) => {
 
   if (response.rows.length === 0) {
     return Promise.reject({
-      status: 404,
+      status: 400,
       msg: `No comments for a review with that ID currently`,
     });
   } else {

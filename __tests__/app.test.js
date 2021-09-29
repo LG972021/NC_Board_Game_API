@@ -80,12 +80,13 @@ describe("GET /api/categories", () => {
 });
 
 describe("GET /api/reviews", () => {
-  test("200 : Responds wtih object with key reviews : value review objects", async () => {
+  test("200 : Responds wtih object with key reviews : value array of review objects", async () => {
     const response = await request(app).get("/api/reviews").expect(200);
     expect(response.body.hasOwnProperty("reviews")).toBe(true);
+    expect(Array.isArray(response.body.reviews)).toBe(true);
   });
 
-  test("200 : Responds wtih objects with corrrect properties of the correct data types.", async () => {
+  test("200 : Responce array should contain objects with corrrect properties of the correct data types.", async () => {
     const response = await request(app).get("/api/reviews").expect(200);
 
     response.body.reviews.forEach((review) => {
@@ -133,7 +134,7 @@ describe("GET /api/reviews", () => {
     });
   });
 
-  test("200 : Functionality in place to order reviews in returned object by one of its properties (ASC or DESC) .", async () => {
+  test("200 : Functionality in place to order reviews in returned object by one of its properties (ASC or DESC order) .", async () => {
     let response = await request(app)
       .get("/api/reviews?sort_by=votes")
       .expect(200);
@@ -189,7 +190,7 @@ describe("GET /api/reviews", () => {
     expect(response.body.reviews[0].owner).toBe("bainesface");
   });
 
-  test("200 : Functionality in place to filter reviews in returned object by a specific category (ASC or DESC) .", async () => {
+  test("200 : Functionality in place to filter reviews in returned object by a specific category (ASC or DESC order) .", async () => {
     let response = await request(app)
       .get("/api/reviews?cat=dexterity")
       .expect(200);
@@ -250,7 +251,52 @@ describe("GET /api/reviews", () => {
       owner: "mallionaire",
       created_at: "2021-01-18T10:01:41.251Z",
     });
+    expect(response.body.reviews[1]).toEqual({
+      review_id: 10,
+      title: "Build you own tour de Yorkshire",
+      review_body:
+        "Cold rain pours on the faces of your team of cyclists, you pulled to the front of the pack early and now your taking on exhaustion cards like there is not tomorrow, you think there are about 2 hands left until you cross the finish line, will you draw enough from your deck to cross before the other team shoot passed? Flamee Rouge is a Racing deck management game where you carefully manage your deck in order to cross the line before your opponents, cyclist can fall slyly behind front runners in their slipstreams to save precious energy for the prefect moment to burst into the lead ",
+      designer: "Asger Harding Granerud",
+      review_img_url:
+        "https://images.pexels.com/photos/258045/pexels-photo-258045.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
+      votes: 10,
+      category: "social deduction",
+      owner: "mallionaire",
+      created_at: "2021-01-18T10:01:41.251Z",
+    });
     expect(response.body.reviews.length).toEqual(11);
+  });
+
+  test("400 : Responds wtih object with key msg : value error message when queried with an unusable sort_by", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=whatamIevendoing")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot sort by that collum");
+  });
+
+  test("400 : Responds wtih object with key msg : value error message when queried with an unusable sort_by", async () => {
+    const response = await request(app)
+      .get("/api/reviews?sort_by=whatamIevendoing")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot sort by that collum");
+  });
+
+  test("400 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
+    const response = await request(app)
+      .get("/api/reviews?cat=whatamIevendoing")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot filter by that category");
+  });
+
+  test("200 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
+    const response = await request(app)
+      .get("/api/reviews?cat=engine-building")
+      .expect(200);
+    expect(response.body.hasOwnProperty("reviews")).toBe(true);
+    expect(response.body.reviews.length).toBe(0);
   });
 });
 
@@ -425,7 +471,7 @@ describe("GET /api/reviews/:review_id/comments", () => {
   });
 
   test("200 : Elements in Array of Reviews should have correct properties and data types", async () => {
-    let response = await request(app)
+    const response = await request(app)
       .get("/api/reviews/2/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
@@ -437,6 +483,17 @@ describe("GET /api/reviews/:review_id/comments", () => {
         created_at: expect.any(String),
       });
     });
+  });
+
+  test("400 : Should respond with an error message when using a valid id with no review", async () => {
+    let response = await request(app)
+      .get("/api/reviews/2000/comments")
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe(
+      "No comments for a review with that ID currently"
+    );
   });
 });
 
