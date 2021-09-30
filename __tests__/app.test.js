@@ -106,17 +106,15 @@ describe("GET /api/reviews", () => {
     });
   });
 
-  test("200 : By Default, returned object is organsied by created_by in DESC order Even if order other than ASC is used", async () => {
+  test("200 : By Default, returned object is organsied by created_by in DESC order, but returns error if neither ASC or DESC is used for order", async () => {
     let response = await request(app).get("/api/reviews").expect(200);
     expect(response.body.reviews).toBeSortedBy("created_at", {
       descending: true,
     });
     response = await request(app)
       .get("/api/reviews?order=whateverorderIsay")
-      .expect(200);
-    expect(response.body.reviews).toBeSortedBy("created_at", {
-      descending: true,
-    });
+      .expect(400);
+    expect(response.body.msg).toBe("Cannot sort in that order");
   });
 
   test("200 : Functionality in place to order reviews in returned object by one of its properties (ASC or DESC order) .", async () => {
@@ -218,16 +216,30 @@ describe("GET /api/reviews", () => {
     expect(response.body.msg).toBe("Cannot sort by that collum");
   });
 
-  test("400 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
+  test("400 : Responds wtih object with key msg : value error message when queried with an unusable sort_by", async () => {
+    let response = await request(app)
+      .get("/api/reviews?order=cantUseThis")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot sort in that order");
+
+    response = await request(app)
+      .get("/api/reviews?sort_by=WhoKnows?&order=cantUseThisASC")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot sort in that order");
+  });
+
+  test("404 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
     let response = await request(app)
       .get("/api/reviews?cat=whatamIevendoing")
-      .expect(400);
+      .expect(404);
     expect(response.body.hasOwnProperty("msg")).toBe(true);
     expect(response.body.msg).toBe("Cannot filter by that category");
 
     response = await request(app)
       .get("/api/reviews?sort_by=dexterity&cat=whatamIevendoing")
-      .expect(400);
+      .expect(404);
     expect(response.body.hasOwnProperty("msg")).toBe(true);
     expect(response.body.msg).toBe("Cannot filter by that category");
   });

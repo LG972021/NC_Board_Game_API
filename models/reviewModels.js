@@ -30,10 +30,17 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
     "social deduction",
   ];
 
+  if (order !== undefined && order !== "ASC" && order !== "DESC") {
+    return Promise.reject({
+      status: 400,
+      msg: `Cannot sort in that order`,
+    });
+  }
+
   if (category !== undefined) {
     if (!validCategories.includes(category)) {
       return Promise.reject({
-        status: 400,
+        status: 404,
         msg: `Cannot filter by that category`,
       });
     } else {
