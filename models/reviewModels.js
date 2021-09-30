@@ -70,6 +70,15 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
 
   SQLQuery += ";";
   const response = await db.query(SQLQuery);
+
+  for (let i = 0; i < response.rows.length; i++) {
+    const commentsWithReviewID = await db.query(
+      `SELECT * FROM comments WHERE review_id = $1;`,
+      [response.rows[i].review_id]
+    );
+    const numCommentsForReview = commentsWithReviewID.rows.length;
+    response.rows[i].comment_count = numCommentsForReview;
+  }
   return response.rows;
 };
 
@@ -118,19 +127,29 @@ exports.changeReviewById = async (incAmount, review_id) => {
 };
 
 exports.fetchCommentsForReviewById = async (review_id) => {
-  const response = await db.query(
-    `SELECT * FROM comments 
+  const checkID = await db.query(
+    `SELECT * FROM reviews 
     WHERE review_id = $1;`,
     [review_id]
   );
 
-  if (response.rows.length === 0) {
+  if (checkID.rows.length === 0) {
     return Promise.reject({
-      status: 400,
-      msg: `No comments for a review with that ID currently`,
+      status: 404,
+      msg: `No review with that ID currently`,
     });
   } else {
-    return response.rows;
+    const response = await db.query(
+      `SELECT * FROM comments 
+      WHERE review_id = $1;`,
+      [review_id]
+    );
+
+    if (response.rows.length === 0) {
+      return [];
+    } else {
+      return response.rows;
+    }
   }
 };
 exports.addCommentForReviewById = async (review_id, author, body) => {
@@ -143,13 +162,26 @@ exports.addCommentForReviewById = async (review_id, author, body) => {
     [author]
   );
 
+  let commentComponentsPresent = false;
+
+  if (author !== undefined && body !== undefined) {
+    commentComponentsPresent = true;
+  }
+
+  if (commentComponentsPresent === false) {
+    return Promise.reject({
+      status: 400,
+      msg: `Missing an essential element of comment`,
+    });
+  }
+
   if (
     reviewExistsCheck.rows.length === 0 ||
     authorExistsCheck.rows.length === 0
   ) {
     return Promise.reject({
       status: 404,
-      msg: `Invalid Review_ID or Username`,
+      msg: `Unable to locate Review or Username`,
     });
   } else {
     const response = await db.query(

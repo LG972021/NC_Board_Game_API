@@ -40,7 +40,7 @@ exports.patchReviewById = async (req, res, next) => {
 
     const patchedReview = await changeReviewById(incAmount, review_id);
 
-    res.status(200).send({ updatedReview: patchedReview });
+    res.status(200).send({ review: patchedReview });
   } catch (error) {
     next(error);
   }
@@ -52,7 +52,7 @@ exports.getCommentsForReviewById = async (req, res, next) => {
 
     const commentsForReview = await fetchCommentsForReviewById(review_id);
 
-    res.status(200).send({ review_comments: commentsForReview });
+    res.status(200).send({ comments: commentsForReview });
   } catch (error) {
     next(error);
   }
@@ -69,7 +69,7 @@ exports.postCommentForReviewById = async (req, res, next) => {
       author,
       body
     );
-    res.status(201).send({ posted_comment: commentForReview });
+    res.status(201).send({ comment: commentForReview });
   } catch (error) {
     next(error);
   }

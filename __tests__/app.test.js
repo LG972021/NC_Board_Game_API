@@ -13,6 +13,7 @@ describe("GET /api/hello", () => {
       .get("/api/hello")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
     expect(response.body.message).toBe("Hello there");
   });
 });
@@ -100,37 +101,21 @@ describe("GET /api/reviews", () => {
         category: expect.any(String),
         created_at: expect.any(String),
         votes: expect.any(Number),
+        comment_count: expect.any(Number),
       });
     });
   });
 
-  test("200 : By Default, returned object is organsied by created_by in DESC order.", async () => {
+  test("200 : By Default, returned object is organsied by created_by in DESC order Even if order other than ASC is used", async () => {
     let response = await request(app).get("/api/reviews").expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 7,
-      title: "Mollit elit qui incididunt veniam occaecat cupidatat",
-      review_body:
-        "Consectetur incididunt aliquip sunt officia. Magna ex nulla consectetur laboris incididunt ea non qui. Enim id eiusmod irure dolor ipsum in tempor consequat amet ullamco. Occaecat fugiat sint fugiat mollit consequat pariatur consequat non exercitation dolore. Labore occaecat in magna commodo anim enim eiusmod eu pariatur ad duis magna. Voluptate ad et dolore ullamco anim sunt do. Qui exercitation tempor in in minim ullamco fugiat ipsum. Duis irure voluptate cupidatat do id mollit veniam culpa. Velit deserunt exercitation amet laborum nostrud dolore in occaecat minim amet nostrud sunt in. Veniam ut aliqua incididunt commodo sint in anim duis id commodo voluptate sit quis.",
-      designer: "Avery Wunzboogerz",
-      review_img_url:
-        "https://images.pexels.com/photos/278888/pexels-photo-278888.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-      votes: 9,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "2021-01-25T11:16:54.963Z",
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
     });
-    expect(response.body.reviews[1]).toEqual({
-      review_id: 4,
-      title: "Dolor reprehenderit",
-      review_body:
-        "Consequat velit occaecat voluptate do. Dolor pariatur fugiat sint et proident ex do consequat est. Nisi minim laboris mollit cupidatat et adipisicing laborum do. Sint sit tempor officia pariatur duis ullamco labore ipsum nisi voluptate nulla eu veniam. Et do ad id dolore id cillum non non culpa. Cillum mollit dolor dolore excepteur aliquip. Cillum aliquip quis aute enim anim ex laborum officia. Aliqua magna elit reprehenderit Lorem elit non laboris irure qui aliquip ad proident. Qui enim mollit Lorem labore eiusmod",
-      designer: "Gamey McGameface",
-      review_img_url:
-        "https://images.pexels.com/photos/278918/pexels-photo-278918.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-      votes: 7,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "2021-01-22T11:35:50.936Z",
+    response = await request(app)
+      .get("/api/reviews?order=whateverorderIsay")
+      .expect(200);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
     });
   });
 
@@ -138,56 +123,28 @@ describe("GET /api/reviews", () => {
     let response = await request(app)
       .get("/api/reviews?sort_by=votes")
       .expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 12,
-      title: "Scythe; you're gonna need a bigger table!",
-      review_body:
-        "Spend 30 minutes just setting up all of the boards (!) meeple and decks, just to forget how to play. Scythe can be a lengthy game but really packs a punch if you put the time in. With beautiful artwork, countless scenarios and clever game mechanics, this board game is a must for any board game fanatic; just make sure you explain ALL the rules before you start playing with first timers or you may find they bring it up again and again.",
-      designer: "Jamey Stegmaier",
-      review_img_url:
-        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
-      votes: 100,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "2021-01-22T10:37:04.839Z",
-    });
-    expect(response.body.reviews[1]).toEqual({
-      review_id: 13,
-      title: "Settlers of Catan: Don't Settle For Less",
-      review_body:
-        "You have stumbled across an uncharted island rich in natural resources, but you are not alone; other adventurers have come ashore too, and the race to settle the island of Catan has begun! Whether you exert military force, build a road to rival the Great Wall, trade goods with ships from the outside world, or some combination of all three, the aim is the same: to dominate the island. Will you prevail? Proceed strategically, trade wisely, and may the odds be in favour.",
-      designer: "Klaus Teuber",
-      review_img_url:
-        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
-      votes: 16,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "1970-01-10T03:08:38.400Z",
+    expect(response.body.reviews).toBeSortedBy("votes", {
+      descending: true,
     });
 
     response = await request(app)
       .get("/api/reviews?sort_by=votes&order=ASC")
       .expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 1,
-      title: "Agricola",
-      review_body: "Farmyard fun!",
-      designer: "Uwe Rosenberg",
-      review_img_url:
-        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-      votes: 1,
-      category: "euro game",
-      owner: "mallionaire",
-      created_at: "2021-01-18T10:00:20.514Z",
+    expect(response.body.reviews).toBeSortedBy("votes", {
+      descending: false,
     });
 
     response = await request(app).get("/api/reviews?sort_by=owner").expect(200);
-    expect(response.body.reviews[0].owner).toBe("philippaclaire9");
+    expect(response.body.reviews).toBeSortedBy("owner", {
+      descending: true,
+    });
 
     response = await request(app)
       .get("/api/reviews?sort_by=owner&&order=ASC")
       .expect(200);
-    expect(response.body.reviews[0].owner).toBe("bainesface");
+    expect(response.body.reviews).toBeSortedBy("owner", {
+      descending: false,
+    });
   });
 
   test("200 : Functionality in place to filter reviews in returned object by a specific category (ASC or DESC order) .", async () => {
@@ -206,6 +163,7 @@ describe("GET /api/reviews", () => {
         category: "dexterity",
         owner: "philippaclaire9",
         created_at: "2021-01-18T10:01:41.251Z",
+        comment_count: 3,
       },
     ]);
     expect(response.body.reviews.length).toEqual(1);
@@ -213,7 +171,17 @@ describe("GET /api/reviews", () => {
     response = await request(app)
       .get("/api/reviews?cat=social deduction")
       .expect(200);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: true,
+    });
+    expect(response.body.reviews.length).toEqual(11);
 
+    response = await request(app)
+      .get("/api/reviews?cat=social deduction&order=ASC")
+      .expect(200);
+    expect(response.body.reviews).toBeSortedBy("created_at", {
+      descending: false,
+    });
     expect(response.body.reviews.length).toEqual(11);
   });
 
@@ -221,77 +189,50 @@ describe("GET /api/reviews", () => {
     let response = await request(app)
       .get("/api/reviews?sort_by=title&&order=ASC&&cat=dexterity")
       .expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 2,
-      title: "Jenga",
-      review_body: "Fiddly fun for all the family",
-      designer: "Leslie Scott",
-      review_img_url:
-        "https://www.golenbock.com/wp-content/uploads/2015/01/placeholder-user.png",
-      votes: 5,
-      category: "dexterity",
-      owner: "philippaclaire9",
-      created_at: "2021-01-18T10:01:41.251Z",
+
+    expect(response.body.reviews).toBeSortedBy("title", {
+      descending: false,
     });
     expect(response.body.reviews.length).toEqual(1);
 
     response = await request(app)
       .get("/api/reviews?sort_by=title&&order=ASC&&cat=social deduction")
       .expect(200);
-    expect(response.body.reviews[0]).toEqual({
-      review_id: 9,
-      title: "A truly Quacking Game; Quacks of Quedlinburg",
-      review_body:
-        "Ever wish you could try your hand at mixing potions? Quacks of Quedlinburg will have you mixing up a homebrew like no other. Each player buys different ingredients (chips) that are drawn at random to reach the most points, but watch out, you'd better not let your cauldrom explode.",
-      designer: "Wolfgang Warsch",
-      review_img_url:
-        "https://images.pexels.com/photos/163064/play-stone-network-networked-interactive-163064.jpeg",
-      votes: 10,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "2021-01-18T10:01:41.251Z",
-    });
-    expect(response.body.reviews[1]).toEqual({
-      review_id: 10,
-      title: "Build you own tour de Yorkshire",
-      review_body:
-        "Cold rain pours on the faces of your team of cyclists, you pulled to the front of the pack early and now your taking on exhaustion cards like there is not tomorrow, you think there are about 2 hands left until you cross the finish line, will you draw enough from your deck to cross before the other team shoot passed? Flamee Rouge is a Racing deck management game where you carefully manage your deck in order to cross the line before your opponents, cyclist can fall slyly behind front runners in their slipstreams to save precious energy for the prefect moment to burst into the lead ",
-      designer: "Asger Harding Granerud",
-      review_img_url:
-        "https://images.pexels.com/photos/258045/pexels-photo-258045.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=750&w=1260",
-      votes: 10,
-      category: "social deduction",
-      owner: "mallionaire",
-      created_at: "2021-01-18T10:01:41.251Z",
+    expect(response.body.reviews).toBeSortedBy("title", {
+      descending: false,
     });
     expect(response.body.reviews.length).toEqual(11);
   });
 
   test("400 : Responds wtih object with key msg : value error message when queried with an unusable sort_by", async () => {
-    const response = await request(app)
+    let response = await request(app)
       .get("/api/reviews?sort_by=whatamIevendoing")
       .expect(400);
     expect(response.body.hasOwnProperty("msg")).toBe(true);
     expect(response.body.msg).toBe("Cannot sort by that collum");
-  });
 
-  test("400 : Responds wtih object with key msg : value error message when queried with an unusable sort_by", async () => {
-    const response = await request(app)
-      .get("/api/reviews?sort_by=whatamIevendoing")
+    response = await request(app)
+      .get("/api/reviews?sort_by=WhoKnows?&order=ASC")
       .expect(400);
     expect(response.body.hasOwnProperty("msg")).toBe(true);
     expect(response.body.msg).toBe("Cannot sort by that collum");
   });
 
   test("400 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
-    const response = await request(app)
+    let response = await request(app)
       .get("/api/reviews?cat=whatamIevendoing")
+      .expect(400);
+    expect(response.body.hasOwnProperty("msg")).toBe(true);
+    expect(response.body.msg).toBe("Cannot filter by that category");
+
+    response = await request(app)
+      .get("/api/reviews?sort_by=dexterity&cat=whatamIevendoing")
       .expect(400);
     expect(response.body.hasOwnProperty("msg")).toBe(true);
     expect(response.body.msg).toBe("Cannot filter by that category");
   });
 
-  test("200 : Responds wtih object with key msg : value error message when queried with an unusable category", async () => {
+  test("200 : Responds wtih object with key reviews : value empty array where queried category is valid but yields no reviews", async () => {
     const response = await request(app)
       .get("/api/reviews?cat=engine-building")
       .expect(200);
@@ -345,12 +286,27 @@ describe("GET /api/reviews/:review_id", () => {
       msg: `No review with that ID currently`,
     });
   });
+
+  test("400 : Returns Error Message when path an unusable review ID", async () => {
+    let response = await request(app)
+      .get("/api/reviews/TestString1")
+      .expect(400);
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+
+    response = await request(app).get("/api/reviews/TestString").expect(400);
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+  });
 });
 
 describe("PATCH /api/reviews/:review_id", () => {
   const inpuctObjInc1 = { inc_votes: 1 };
   const inpuctObjInc2 = { inc_votes: -1 };
   const inpuctObjInc3 = { inc_votes: -100 };
+  const brokenInpuctObjInc1 = { inc_votes: "this isn't right" };
+  const brokenInpuctObjInc2 = { inc_votes: true };
+  const brokenInpuctObjInc3 = { inc_votes: "teststring1" };
 
   test("200 : Responds wtih object", async () => {
     const response = await request(app)
@@ -359,7 +315,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
 
-    expect(typeof response.body.updatedReview).toBe("object");
+    expect(typeof response.body.review).toBe("object");
   });
 
   test("200 : Responds wtih object with corrrect properties of the correct data type.", async () => {
@@ -369,9 +325,9 @@ describe("PATCH /api/reviews/:review_id", () => {
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
 
-    expect(response.body.hasOwnProperty("updatedReview")).toBe(true);
+    expect(response.body.hasOwnProperty("review")).toBe(true);
 
-    expect(response.body.updatedReview).toMatchObject({
+    expect(response.body.review).toMatchObject({
       owner: expect.any(String),
       title: expect.any(String),
       review_id: expect.any(Number),
@@ -391,7 +347,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
 
-    expect(response.body.updatedReview).toEqual({
+    expect(response.body.review).toEqual({
       review_id: 2,
       title: "Jenga",
       designer: "Leslie Scott",
@@ -411,7 +367,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       .send(inpuctObjInc1)
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.updatedReview.votes).toBe(6);
+    expect(response.body.review.votes).toBe(6);
   });
 
   test("200 : Returned Object's votes property is returned REDUCED by 1 when input object's inc_votes is -1", async () => {
@@ -420,7 +376,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       .send(inpuctObjInc2)
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.updatedReview.votes).toBe(4);
+    expect(response.body.review.votes).toBe(4);
   });
 
   test("200 : Returned Object's votes property is returned REDUCED by 100 when input object's inc_votes is -100", async () => {
@@ -429,7 +385,7 @@ describe("PATCH /api/reviews/:review_id", () => {
       .send(inpuctObjInc3)
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.updatedReview.votes).toBe(-95);
+    expect(response.body.review.votes).toBe(-95);
   });
 
   test("404 : Returns Error Message when path uses Id with no associated review", async () => {
@@ -441,15 +397,68 @@ describe("PATCH /api/reviews/:review_id", () => {
       msg: `No review with that ID currently`,
     });
   });
+
+  test("400 : Returns Error Message when path uses unusable review_id", async () => {
+    let response = await request(app)
+      .patch("/api/reviews/teststring")
+      .send(inpuctObjInc1)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+
+    response = await request(app)
+      .patch("/api/reviews/teststring1")
+      .send(inpuctObjInc1)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+  });
+
+  test("400 : Returns Error Message when sending an unusable amount to increment votes by", async () => {
+    let response = await request(app)
+      .patch("/api/reviews/2")
+      .send(brokenInpuctObjInc1)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+
+    response = await request(app)
+      .patch("/api/reviews/1")
+      .send(brokenInpuctObjInc1)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+
+    response = await request(app)
+      .patch("/api/reviews/2")
+      .send(brokenInpuctObjInc2)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+
+    response = await request(app)
+      .patch("/api/reviews/2")
+      .send(brokenInpuctObjInc3)
+      .expect(400);
+    expect(response.body).toEqual({
+      message: `Bad Request`,
+    });
+  });
 });
 
 describe("GET /api/reviews/:review_id/comments", () => {
-  test("200 : Responds wtih object with key review_comments : value Array of Reviews ", async () => {
+  test("200 : Responds wtih object with key comments : value Array of comments for the review matching ID param", async () => {
     let response = await request(app)
       .get("/api/reviews/2/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.review_comments.length).toBe(3);
+    expect(response.body.hasOwnProperty("comments")).toBe(true);
+    expect(response.body.comments.length).toBe(3);
 
     response = await request(app)
       .get("/api/reviews/2")
@@ -461,7 +470,7 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .get("/api/reviews/3/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.review_comments.length).toBe(3);
+    expect(response.body.comments.length).toBe(3);
 
     response = await request(app)
       .get("/api/reviews/3")
@@ -475,7 +484,7 @@ describe("GET /api/reviews/:review_id/comments", () => {
       .get("/api/reviews/2/comments")
       .expect(200)
       .expect("Content-Type", "application/json; charset=utf-8");
-    response.body.review_comments.forEach((comment) => {
+    response.body.comments.forEach((comment) => {
       expect(comment).toMatchObject({
         body: expect.any(String),
         author: expect.any(String),
@@ -485,48 +494,78 @@ describe("GET /api/reviews/:review_id/comments", () => {
     });
   });
 
-  test("400 : Should respond with an error message when using a valid id with no review", async () => {
+  test("200 : comment should be an empty array if review ID yields review with no comments", async () => {
+    const response = await request(app)
+      .get("/api/reviews/1/comments")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.comments.length).toBe(0);
+    expect(response.body.comments).toEqual([]);
+  });
+
+  test("404 : Should respond with an error message when using a valid id with no review", async () => {
     let response = await request(app)
       .get("/api/reviews/2000/comments")
-      .expect(400)
+      .expect(404)
       .expect("Content-Type", "application/json; charset=utf-8");
     expect(response.body.hasOwnProperty("msg")).toBe(true);
-    expect(response.body.msg).toBe(
-      "No comments for a review with that ID currently"
-    );
+    expect(response.body.msg).toBe("No review with that ID currently");
+  });
+
+  test("400 : Should respond with an error message when using an unuable review id", async () => {
+    let response = await request(app)
+      .get("/api/reviews/noReviewHere/comments")
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+
+    response = await request(app)
+      .get("/api/reviews/no Review Here/comments")
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+
+    response = await request(app)
+      .get("/api/reviews/no1 Review2 Here3/comments")
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
   });
 });
 
 describe("POST /api/reviews/:review_id/comments", () => {
   test("200 : Responds wtih object with key posted_review : value comment object ", async () => {
-    const inputCommnet = {
+    const inputComment = {
       username: "dav3rid",
       body: "This is the body of the test review",
     };
 
     const response = await request(app)
       .post("/api/reviews/2/comments")
-      .send(inputCommnet)
+      .send(inputComment)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(typeof response.body.posted_comment).toBe("object");
+    expect(typeof response.body.comment).toBe("object");
   });
 
   test("200 : Comment object should contain correct properties of the correct datatypes", async () => {
-    const inputCommnet = {
+    const inputComment = {
       username: "dav3rid",
-      body: "This is the body of the test review",
+      body: "This is the body of the test comment",
     };
 
     const response = await request(app)
       .post("/api/reviews/2/comments")
-      .send(inputCommnet)
+      .send(inputComment)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
 
-    expect(response.body.hasOwnProperty("posted_comment")).toBe(true);
+    expect(response.body.hasOwnProperty("comment")).toBe(true);
 
-    expect(response.body.posted_comment).toMatchObject({
+    expect(response.body.comment).toMatchObject({
       comment_id: expect.any(Number),
       body: expect.any(String),
       votes: expect.any(Number),
@@ -539,7 +578,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
   test("200 : Comment object's author and body properties should reflect the values in input object whilst incremented comment_id for new comments", async () => {
     const inputCommnet = {
       username: "dav3rid",
-      body: "This is the body of the test review",
+      body: "This is the body of the test comment",
     };
 
     let response = await request(app)
@@ -547,9 +586,9 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.posted_comment).toEqual({
+    expect(response.body.comment).toEqual({
       comment_id: 7,
-      body: "This is the body of the test review",
+      body: "This is the body of the test comment",
       votes: 0,
       author: "dav3rid",
       review_id: 2,
@@ -561,9 +600,9 @@ describe("POST /api/reviews/:review_id/comments", () => {
       .send(inputCommnet)
       .expect(201)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.posted_comment).toEqual({
+    expect(response.body.comment).toEqual({
       comment_id: 8,
-      body: "This is the body of the test review",
+      body: "This is the body of the test comment",
       votes: 0,
       author: "dav3rid",
       review_id: 1,
@@ -571,32 +610,159 @@ describe("POST /api/reviews/:review_id/comments", () => {
     });
   });
 
-  test("404 : Responds wtih 404 and error message when username isn't on list of users", async () => {
-    const inputCommnet = {
-      username: "invalidUserName",
-      body: "This is the body of the test review",
-    };
-
-    let response = await request(app)
-      .post("/api/reviews/2/comments")
-      .send(inputCommnet)
-      .expect(404)
-      .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.msg).toBe("Invalid Review_ID or Username");
-  });
-
-  test("404 : Responds wtih 404 and error message when username isn't on list of users", async () => {
-    const inputCommnet = {
+  test("200 : Succesfully posting comment should increment the comment count of the review ID's review", async () => {
+    const inputComment = {
       username: "dav3rid",
       body: "This is the body of the test review",
     };
 
     let response = await request(app)
-      .post("/api/reviews/1000/comments")
+      .post("/api/reviews/2/comments")
+      .send(inputComment)
+      .expect(201)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(typeof response.body.comment).toBe("object");
+
+    response = await request(app)
+      .get("/api/reviews/2/comments")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.comments.length).toBe(4);
+
+    response = await request(app)
+      .get("/api/reviews/2")
+      .expect(200)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.review.comment_count).toBe(4);
+  });
+
+  test("400 : Responds wtih 400 and error message when using a unusable review ID ", async () => {
+    const inputCommnet = {
+      username: "dav3rid",
+      body: "This is the body of the test comment",
+    };
+
+    let response = await request(app)
+      .post("/api/reviews/WhatevenIsThis/comments")
+      .send(inputCommnet)
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+
+    response = await request(app)
+      .post("/api/reviews/otherReview1/comments")
+      .send(inputCommnet)
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.hasOwnProperty("message")).toBe(true);
+    expect(response.body.message).toBe("Bad Request");
+  });
+
+  test("404 : Responds wtih 404 and error message when username isn't on list of users", async () => {
+    const inputCommnet = {
+      username: "invalidUserName",
+      body: "This is the body of the test comment",
+    };
+
+    const response = await request(app)
+      .post("/api/reviews/2/comments")
       .send(inputCommnet)
       .expect(404)
       .expect("Content-Type", "application/json; charset=utf-8");
-    expect(response.body.msg).toBe("Invalid Review_ID or Username");
+    expect(response.body.msg).toBe("Unable to locate Review or Username");
+  });
+
+  test("400 : Responds wtih 404 and error message, when input object is missing an element", async () => {
+    const BadInputComment1 = {
+      username: "dav3rid",
+    };
+
+    const BadInputComment2 = {
+      body: "This is the body of the test comment",
+    };
+
+    let response = await request(app)
+      .post("/api/reviews/1/comments")
+      .send(BadInputComment1)
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.msg).toBe("Missing an essential element of comment");
+
+    response = await request(app)
+      .post("/api/reviews/1/comments")
+      .send(BadInputComment2)
+      .expect(400)
+      .expect("Content-Type", "application/json; charset=utf-8");
+    expect(response.body.msg).toBe("Missing an essential element of comment");
+  });
+
+  test("201 : Retruned posted comment should only contain author and body, even if additional superfluous elements are provided in input object", async () => {
+    const TMIInputComment1 = {
+      username: "dav3rid",
+      body: "This is the body of the test comment",
+      trivia: "This is some comment trivia",
+    };
+
+    const TMIInputComment2 = {
+      username: "dav3rid",
+      body: "This is the body of the test comment2",
+      trivia: "This is some comment trivia",
+      randomNumber: 0,
+    };
+
+    let response = await request(app)
+      .post("/api/reviews/1/comments")
+      .send(TMIInputComment1)
+      .expect(201)
+      .expect("Content-Type", "application/json; charset=utf-8");
+
+    expect(response.body.comment).toMatchObject({
+      comment_id: expect.any(Number),
+      body: expect.any(String),
+      votes: expect.any(Number),
+      author: expect.any(String),
+      review_id: expect.any(Number),
+      created_at: expect.any(String),
+    });
+
+    expect(response.body.comment).toEqual({
+      comment_id: 7,
+      body: "This is the body of the test comment",
+      votes: 0,
+      author: "dav3rid",
+      review_id: 1,
+      created_at: expect.any(String),
+    });
+
+    expect(response.body.comment.hasOwnProperty("trivia")).toBe(false);
+
+    response = await request(app)
+      .post("/api/reviews/1/comments")
+      .send(TMIInputComment2)
+      .expect(201)
+      .expect("Content-Type", "application/json; charset=utf-8");
+
+    expect(response.body.comment).toMatchObject({
+      comment_id: expect.any(Number),
+      body: expect.any(String),
+      votes: expect.any(Number),
+      author: expect.any(String),
+      review_id: expect.any(Number),
+      created_at: expect.any(String),
+    });
+
+    expect(response.body.comment).toEqual({
+      comment_id: 8,
+      body: "This is the body of the test comment2",
+      votes: 0,
+      author: "dav3rid",
+      review_id: 1,
+      created_at: expect.any(String),
+    });
+
+    expect(response.body.comment.hasOwnProperty("trivia")).toBe(false);
+    expect(response.body.comment.hasOwnProperty("randomNumber")).toBe(false);
   });
 });
 

@@ -5,5 +5,9 @@ exports.handleCustomErrors = (err, req, res, next) => {
 };
 
 exports.handleServerErrors = (err, req, res, next) => {
-  res.status(500).send({ message: "Internal Server Error" });
+  if (err.code === "22P02") {
+    res.status(400).send({ message: "Bad Request" });
+  } else {
+    res.status(500).send({ message: "Internal Server Error" });
+  }
 };
