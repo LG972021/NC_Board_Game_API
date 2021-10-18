@@ -1,7 +1,4 @@
-const { response } = require("express");
-const format = require("pg-format");
 const db = require("../db/connection.js");
-const { sort } = require("../db/data/test-data/categories.js");
 
 exports.fetchAllReviews = async (sort_by, order, category) => {
   let SQLQuery = `SELECT * FROM reviews `;
