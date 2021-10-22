@@ -12,6 +12,7 @@ exports.fetchAllReviews = async (sort_by, order, category) => {
     "category",
     "owner",
     "created_at",
+    "comment_count",
   ];
 
   const validCategories = [

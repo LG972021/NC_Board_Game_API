@@ -709,7 +709,7 @@ describe("POST /api/reviews/:review_id/comments", () => {
     expect(response.body.msg).toBe("Missing an essential element of comment");
   });
 
-  test("201 : Retruned posted comment should only contain author and body, even if additional superfluous elements are provided in input object", async () => {
+  test("201 : Returned posted comment should only contain author and body, even if additional superfluous elements are provided in input object", async () => {
     const TMIInputComment1 = {
       username: "dav3rid",
       body: "This is the body of the test comment",
